@@ -62,89 +62,128 @@ const CrewMateCard = ({
   };
 
   return (
-    <div
-      className="flex flex-col items-center gap-2 bg-gray-800 text-white p-4 rounded-2xl shadow-lg hover:shadow-xl 
-      transition-all duration-300 transform hover:-translate-y-1 w-48 cursor-pointer"
-      key={id}
-    >
-      <img
-        src={isEditing ? editImage : src}
-        alt={name}
-        className="w-24 h-24 rounded-full border-4 border-gray-700 object-cover"
-      />
+    <div className="group bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-700 transition-all duration-300">
+      {/* Image Section */}
+      <div className="relative aspect-square bg-gray-800 overflow-hidden">
+        {src || editImage ? (
+          <img
+            src={isEditing ? editImage : src}
+            alt={name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-600 text-6xl">
+            👤
+          </div>
+        )}
 
-      {isEditing ? (
-        <>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="text-xs text-gray-300 w-full file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs file:cursor-pointer hover:file:bg-blue-700"
-          />
-          <input
-            type="text"
-            value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
-            className="w-full text-lg font-semibold mt-2 bg-gray-700 rounded px-2 py-1 text-center"
-          />
-          <input
-            type="number"
-            value={editedSpeed}
-            onChange={(e) => setEditedSpeed(e.target.value)}
-            className="w-full text-sm text-gray-300 bg-gray-700 rounded px-2 py-1 text-center"
-            placeholder="Speed"
-          />
-          <input
-            type="text"
-            value={editedColor}
-            onChange={(e) => setEditedColor(e.target.value)}
-            className="w-full text-sm bg-gray-700 rounded px-2 py-1 text-center"
-            placeholder="Color"
-          />
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={handleSave}
-              disabled={isUploading}
-              className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition disabled:bg-gray-600 disabled:cursor-not-allowed"
-            >
-              {isUploading ? "Saving..." : "Save"}
-            </button>
+        {/* Edit Image Upload in Edit Mode */}
+        {isEditing && (
+          <label className="absolute inset-0 flex items-center justify-center bg-black/60 cursor-pointer hover:bg-black/70 transition">
+            <div className="text-center">
+              <span className="text-white text-3xl block mb-2">📷</span>
+              <span className="text-sm text-gray-300">Change Image</span>
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </label>
+        )}
+      </div>
+
+      {/* Content Section */}
+      <div className="p-4 space-y-3">
+        {isEditing ? (
+          <>
+            {/* Edit Mode */}
+            <input
+              type="text"
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              placeholder="Name"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <input
+              type="number"
+              value={editedSpeed}
+              onChange={(e) => setEditedSpeed(e.target.value)}
+              placeholder="Speed"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <input
+              type="text"
+              value={editedColor}
+              onChange={(e) => setEditedColor(e.target.value)}
+              placeholder="Color"
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={handleSave}
+                disabled={isUploading}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition disabled:bg-gray-700 disabled:cursor-not-allowed"
+              >
+                {isUploading ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={() => onEditToggle(id)}
+                disabled={isUploading}
+                className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 rounded-lg font-medium transition disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* View Mode */}
+            <div>
+              <h3 className="text-lg font-semibold text-white truncate">
+                {name || "Unnamed"}
+              </h3>
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-400">Speed</span>
+              <span className="text-white font-medium">{speed || "0"}</span>
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-400">Color</span>
+              <span
+                className={`font-medium ${
+                  color?.toLowerCase() === "red"
+                    ? "text-red-400"
+                    : color?.toLowerCase() === "blue"
+                    ? "text-blue-400"
+                    : color?.toLowerCase() === "green"
+                    ? "text-green-400"
+                    : color?.toLowerCase() === "yellow"
+                    ? "text-yellow-400"
+                    : color?.toLowerCase() === "purple"
+                    ? "text-purple-400"
+                    : "text-gray-400"
+                }`}
+              >
+                {color || "None"}
+              </span>
+            </div>
+
+            {/* Edit Button */}
             <button
               onClick={() => onEditToggle(id)}
-              disabled={isUploading}
-              className="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm font-medium transition disabled:cursor-not-allowed"
+              className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 rounded-lg font-medium transition mt-2"
             >
-              Cancel
+              Edit
             </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <p className="text-lg font-semibold mt-2">{name}</p>
-          <p className="text-sm text-gray-300">Speed: {speed}</p>
-          <p
-            className={`text-sm font-medium ${
-              color.toLowerCase() === "red"
-                ? "text-red-400"
-                : color.toLowerCase() === "blue"
-                ? "text-blue-400"
-                : color.toLowerCase() === "green"
-                ? "text-green-400"
-                : color.toLowerCase() === "yellow"
-                ? "text-yellow-400"
-                : "text-purple-400"
-            }`}
-          >
-            Color: {color}
-          </p>
-          <button
-            onClick={() => onEditToggle(id)}
-            className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition"
-          >
-            Edit CrewMate
-          </button>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

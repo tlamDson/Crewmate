@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CrewMateCard from "../components/CrewMateCard";
+import Layout from "../components/Layout";
 import { getAllCrewmates } from "../services";
 
 const CrewmateGallery = () => {
@@ -39,42 +40,72 @@ const CrewmateGallery = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-white text-lg">Loading crewmates...</p>
-      </div>
+      <Layout>
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-400 text-lg">Loading crewmates...</p>
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-red-400 text-lg">Error: {error}</p>
-      </div>
+      <Layout>
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-center p-8 bg-red-900/20 rounded-xl border border-red-800">
+            <p className="text-red-400 text-lg mb-2">⚠️ Error</p>
+            <p className="text-gray-400">{error}</p>
+          </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-      {crewmates && crewmates.length > 0 ? (
-        crewmates.map((crewmate) => (
-          <CrewMateCard
-            key={crewmate.id}
-            id={crewmate.id}
-            src={crewmate.src}
-            name={crewmate.name}
-            speed={crewmate.speed}
-            color={crewmate.color}
-            onEditToggle={() => handleEditToggle(crewmate.id)}
-            isEditing={editingId === crewmate.id}
-            onSave={handleSave}
-          />
-        ))
-      ) : (
-        <p className="text-gray-400 col-span-full text-center">
-          No crewmates yet. Create your first one!
-        </p>
-      )}
-    </div>
+    <Layout>
+      <div className="p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+            Crewmate Gallery
+          </h1>
+          <p className="text-gray-400">
+            {crewmates.length}{" "}
+            {crewmates.length === 1 ? "crewmate" : "crewmates"}
+          </p>
+        </div>
+
+        {/* Grid */}
+        {crewmates && crewmates.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+            {crewmates.map((crewmate) => (
+              <CrewMateCard
+                key={crewmate.id}
+                id={crewmate.id}
+                src={crewmate.src}
+                name={crewmate.name}
+                speed={crewmate.speed}
+                color={crewmate.color}
+                onEditToggle={() => handleEditToggle(crewmate.id)}
+                isEditing={editingId === crewmate.id}
+                onSave={handleSave}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="text-6xl mb-4">🚀</div>
+            <p className="text-gray-400 text-lg mb-2">No crewmates yet</p>
+            <p className="text-gray-500 text-sm">
+              Create your first one to get started!
+            </p>
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 };
 
