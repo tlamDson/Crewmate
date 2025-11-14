@@ -17,7 +17,7 @@ const CrewMateCard = ({
   const updateCrewmate = async () => {
     const { data, error } = await supabase
       .from("Crewmates")
-      .update({ editedName, editedSpeed, editedColor })
+      .update({ name: editedName, speed: editedSpeed, color: editedColor })
       .eq("id", id);
     if (error) {
       console.error(error);
