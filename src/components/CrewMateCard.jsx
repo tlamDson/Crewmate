@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
+import React, { useState } from "react";
+import { uploadImage, updateCrewmate } from "../services";
 
 const CrewMateCard = ({
   id,
@@ -11,29 +11,54 @@ const CrewMateCard = ({
   isEditing,
   onSave,
 }) => {
+  const [editImage, setEditImage] = useState(src);
   const [editedName, setEditedName] = useState(name);
   const [editedSpeed, setEditedSpeed] = useState(speed);
   const [editedColor, setEditedColor] = useState(color);
-  const updateCrewmate = async () => {
-    const { data, error } = await supabase
-      .from("Crewmates")
-      .update({ name: editedName, speed: editedSpeed, color: editedColor })
-      .eq("id", id);
-    if (error) {
-      console.error(error);
-    } else {
-      alert("Crewmate updated");
+  const [imageFile, setImageFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSave = () => {
-    onSave({
-      id,
-      name: editedName,
-      speed: editedSpeed,
-      color: editedColor,
-    });
-    updateCrewmate();
+  const handleSave = async () => {
+    setIsUploading(true);
+    try {
+      let imageUrl = src; // Keep existing image by default
+
+      // Upload new image if one was selected
+      if (imageFile) {
+        const result = await uploadImage(imageFile);
+        imageUrl = result.url;
+      }
+
+      // Update crewmate using service
+      const updatedData = await updateCrewmate(id, {
+        name: editedName,
+        speed: editedSpeed,
+        color: editedColor,
+        src: imageUrl,
+      });
+
+      // Update parent state
+      onSave(updatedData);
+
+      alert("Crewmate updated!");
+    } catch (error) {
+      alert(error.message || "Failed to update crewmate");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -43,13 +68,19 @@ const CrewMateCard = ({
       key={id}
     >
       <img
-        src={src}
+        src={isEditing ? editImage : src}
         alt={name}
         className="w-24 h-24 rounded-full border-4 border-gray-700 object-cover"
       />
 
       {isEditing ? (
         <>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="text-xs text-gray-300 w-full file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs file:cursor-pointer hover:file:bg-blue-700"
+          />
           <input
             type="text"
             value={editedName}
@@ -73,13 +104,15 @@ const CrewMateCard = ({
           <div className="flex gap-2 mt-2">
             <button
               onClick={handleSave}
-              className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition"
+              disabled={isUploading}
+              className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition disabled:bg-gray-600 disabled:cursor-not-allowed"
             >
-              Save
+              {isUploading ? "Saving..." : "Save"}
             </button>
             <button
               onClick={() => onEditToggle(id)}
-              className="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm font-medium transition"
+              disabled={isUploading}
+              className="px-3 py-1 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm font-medium transition disabled:cursor-not-allowed"
             >
               Cancel
             </button>

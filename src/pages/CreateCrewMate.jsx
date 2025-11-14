@@ -1,29 +1,62 @@
 import React, { useState } from "react";
-import { supabase } from "../supabaseClient";
 import Sidebar from "../components/Sidebar";
+import { uploadImage, createCrewmate } from "../services";
 
 const CreateCrewMate = () => {
   const [name, setName] = useState("");
   const [speed, setSpeed] = useState("");
   const [color, setColor] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const addCrewmate = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.from("Crewmates").insert([
-      {
-        name: name,
-        speed: speed,
-        color: color,
-      },
-    ]);
-    if (error) {
-      console.error(error);
-      alert("Failed to add");
-      return;
+    setIsUploading(true);
+
+    try {
+      let imageUrl = null;
+
+      // Upload image if one was selected
+      if (imageFile) {
+        const result = await uploadImage(imageFile);
+        imageUrl = result.url;
+      }
+
+      // Create crewmate using service
+      await createCrewmate({
+        name,
+        speed,
+        color,
+        src: imageUrl,
+      });
+
+      alert("Crewmate added!");
+
+      // Reset form
+      setName("");
+      setSpeed("");
+      setColor("");
+      setImageFile(null);
+      setImagePreview(null);
+    } catch (error) {
+      alert(error.message || "Failed to add crewmate");
+    } finally {
+      setIsUploading(false);
     }
-    alert("Crewmate added!");
-    setName("");
-    setSpeed("");
-    setColor("");
   };
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-900 p-6">
@@ -68,18 +101,32 @@ const CreateCrewMate = () => {
 
           <div className="flex flex-col gap-1">
             <label className="text-sm text-gray-300">Image</label>
-            <input type="file" className="text-gray-200" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:cursor-pointer hover:file:bg-blue-700"
+            />
           </div>
 
-          <div className="w-full h-40 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 border border-gray-600">
-            Image Preview
+          <div className="w-full h-40 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 border border-gray-600 overflow-hidden">
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              "Image Preview"
+            )}
           </div>
 
           <button
-            className="w-full bg-blue-600 hover:bg-blue-700 transition py-2 rounded-lg font-semibold"
+            className="w-full bg-blue-600 hover:bg-blue-700 transition py-2 rounded-lg font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed"
             onClick={addCrewmate}
+            disabled={isUploading}
           >
-            Create Crewmate
+            {isUploading ? "Uploading..." : "Create Crewmate"}
           </button>
         </div>
       </div>
