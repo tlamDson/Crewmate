@@ -34,6 +34,11 @@ const CrewmateGallery = () => {
     setEditingId(null);
   };
 
+  const handleDelete = (deletedId) => {
+    setCrewmates((prev) => prev.filter((mate) => mate.id !== deletedId));
+    setEditingId(null);
+  };
+
   useEffect(() => {
     fetchCrewmates();
   }, []);
@@ -92,6 +97,7 @@ const CrewmateGallery = () => {
                 onEditToggle={() => handleEditToggle(crewmate.id)}
                 isEditing={editingId === crewmate.id}
                 onSave={handleSave}
+                onDelete={handleDelete}
               />
             ))}
           </div>
