@@ -1,7 +1,90 @@
-import React from "react";
+import React, { useState } from "react";
+import { supabase } from "../supabaseClient";
+import Sidebar from "../components/Sidebar";
 
 const CreateCrewMate = () => {
-  return <div>CreateCrewMate</div>;
+  const [name, setName] = useState("");
+  const [speed, setSpeed] = useState("");
+  const [color, setColor] = useState("");
+  const addCrewmate = async (e) => {
+    e.preventDefault();
+    const { error } = await supabase.from("Crewmates").insert([
+      {
+        name: name,
+        speed: speed,
+        color: color,
+      },
+    ]);
+    if (error) {
+      console.error(error);
+      alert("Failed to add");
+      return;
+    }
+    alert("Crewmate added!");
+    setName("");
+    setSpeed("");
+    setColor("");
+  };
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-900 p-6">
+      <Sidebar />
+      <div className="bg-gray-800 text-white p-6 rounded-2xl shadow-xl w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Create New Crewmate
+        </h2>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-300">Name</label>
+            <input
+              required
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="bg-gray-700 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-300">Speed</label>
+            <input
+              required
+              type="number"
+              value={speed}
+              onChange={(e) => setSpeed(e.target.value)}
+              className="bg-gray-700 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-300">Color</label>
+            <input
+              required
+              type="text"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="bg-gray-700 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-300">Image</label>
+            <input type="file" className="text-gray-200" />
+          </div>
+
+          <div className="w-full h-40 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400 border border-gray-600">
+            Image Preview
+          </div>
+
+          <button
+            className="w-full bg-blue-600 hover:bg-blue-700 transition py-2 rounded-lg font-semibold"
+            onClick={addCrewmate}
+          >
+            Create Crewmate
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CreateCrewMate;
