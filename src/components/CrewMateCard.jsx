@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient";
 
 const CrewMateCard = ({
   id,
@@ -13,20 +14,26 @@ const CrewMateCard = ({
   const [editedName, setEditedName] = useState(name);
   const [editedSpeed, setEditedSpeed] = useState(speed);
   const [editedColor, setEditedColor] = useState(color);
+  const updateCrewmate = async () => {
+    const { data, error } = await supabase
+      .from("Crewmates")
+      .update({ editedName, editedSpeed, editedColor })
+      .eq("id", id);
+    if (error) {
+      console.error(error);
+    } else {
+      alert("Crewmate updated");
+    }
+  };
 
   const handleSave = () => {
-    console.log("Saving:", {
-      id,
-      name: editedName,
-      speed: editedSpeed,
-      color: editedColor,
-    });
     onSave({
       id,
       name: editedName,
       speed: editedSpeed,
       color: editedColor,
     });
+    updateCrewmate();
   };
 
   return (
